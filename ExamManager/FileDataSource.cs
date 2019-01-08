@@ -23,5 +23,10 @@ namespace ExamManager
             }
             return students;
         }
+
+        public Student Insert(Student student)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

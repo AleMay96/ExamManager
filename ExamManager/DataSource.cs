@@ -7,5 +7,6 @@ namespace ExamManager
     public interface DataSource
     {
         IEnumerable<Student> AllStudents();
+        Student Insert( Student student );
     }
 }

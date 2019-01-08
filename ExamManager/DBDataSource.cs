@@ -11,14 +11,16 @@ namespace ExamManager
             @"select id, name, surname, age, gender, grade 
                     from studente";
 
-        public IEnumerable<Student> AllStudents()
-        {
+        public const string INSERT_STUDENT_COMMAND =
+            @"insert into studente
+                    (name, surname, age, gender, grade) output INSERTED.ID values (@name, @surname, @age, @gender, @grade)";
 
-            var connString =
+        public const string connString =
                 @"Data Source=(localdb)\MSSQLLocalDB;
                 Initial Catalog=scuola;Integrated Security=True;";
 
-
+        public IEnumerable<Student> AllStudents()
+        {
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 conn.Open();
@@ -26,7 +28,7 @@ namespace ExamManager
                 {
                     SqlDataReader reader = command.ExecuteReader();
                     var posId = reader.GetOrdinal("id");
-                    var posName= reader.GetOrdinal("name");
+                    var posName = reader.GetOrdinal("name");
                     var posSurname = reader.GetOrdinal("surname");
                     var posAge = reader.GetOrdinal("age");
                     var posGender = reader.GetOrdinal("gender");
@@ -39,7 +41,7 @@ namespace ExamManager
                               reader.GetString(posName),
                               reader.GetString(posSurname),
                               reader.GetInt32(posAge),
-                              (Sex)Enum.Parse(typeof(Sex),reader.GetString(posGender)),
+                              (Sex)Enum.Parse(typeof(Sex), reader.GetString(posGender)),
                               reader.GetInt32(posGrade)
                             );
                         students.Add(st);
@@ -47,7 +49,27 @@ namespace ExamManager
                     return students;
                 }
             }
-            
+
+        }
+
+        public Student Insert(Student student)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+                using (SqlCommand command = new SqlCommand(INSERT_STUDENT_COMMAND, conn))
+                {
+                    command.Parameters.AddWithValue("@name", student.Name);
+                    command.Parameters.AddWithValue("@surname", student.Surname);
+                    command.Parameters.AddWithValue("@age", student.Age);
+                    command.Parameters.AddWithValue("@gender", student.Gender);
+                    command.Parameters.AddWithValue("@grade", student.Grade);
+
+                    int id = (int)command.ExecuteScalar();
+                    student.Id = id;
+                    return student;
+                }
+            }
         }
     }
 }
